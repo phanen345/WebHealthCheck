@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Health Report — {{ meta.url }}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f4f5f7; color: #24292e; font-size: 14px; line-height: 1.6; }
+
+    /* ── Header ── */
+    header { background: #1a1f2e; color: #fff; padding: 28px 40px; }
+    header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    header p  { font-size: 13px; color: #8b949e; }
+
+    /* ── Nav Tabs ── */
+    nav.tabs { background: #fff; border-bottom: 1px solid #e1e4e8; padding: 0 40px; display: flex; gap: 0; position: sticky; top: 0; z-index: 100; }
+    nav.tabs a { display: inline-block; padding: 12px 16px; font-size: 13px; font-weight: 500; color: #6a737d; text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.2s; cursor: pointer; }
+    nav.tabs a:hover { color: #24292e; }
+    nav.tabs a.active { color: #0366d6; border-bottom-color: #0366d6; }
+
+    /* ── Layout ── */
+    main { max-width: 1100px; margin: 32px auto; padding: 0 24px 80px; }
+    section { margin-bottom: 36px; display: none; }
+    section.active { display: block; }
+
+    /* ── Section Header ── */
+    h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e1e4e8; color: #24292e; display: flex; align-items: center; gap: 8px; }
+
+    /* ── Cards ── */
+    .card { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; }
+    .card-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #24292e; }
+
+    /* ── Score Grid ── */
+    .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+    .score-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; text-align: center; }
+    .score-card .number { font-size: 32px; font-weight: 700; line-height: 1.1; }
+    .score-card .label  { font-size: 11px; color: #6a737d; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* ── Grade colors ── */
+    .grade-A, .c-green  { color: #22863a; }
+    .grade-B, .c-blue   { color: #2188ff; }
+    .grade-C, .c-yellow { color: #e36209; }
+    .grade-D, .grade-F, .c-red { color: #d73a49; }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    .badge-ok       { background: #dcffe4; color: #1a7f37; }
+    .badge-pass     { background: #dcffe4; color: #1a7f37; }
+    .badge-broken   { background: #ffeef0; color: #86181d; }
+    .badge-fail     { background: #ffeef0; color: #86181d; }
+    .badge-warn     { background: #fff5b1; color: #735c0f; }
+    .badge-warning  { background: #fff5b1; color: #735c0f; }
+    .badge-error    { background: #ffeef0; color: #86181d; }
+    .badge-missing  { background: #ffeef0; color: #86181d; }
+    .badge-present  { background: #dcffe4; color: #1a7f37; }
+    .badge-redirect { background: #dbedff; color: #0366d6; }
+    .badge-medium   { background: #fff5b1; color: #735c0f; }
+    .badge-high     { background: #ffeef0; color: #86181d; }
+    .badge-low      { background: #f1f8ff; color: #0366d6; }
+    .badge-info     { background: #f6f8fa; color: #6a737d; }
+    .badge-yes      { background: #dcffe4; color: #1a7f37; }
+    .badge-no       { background: #ffeef0; color: #86181d; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f6f8fa; border-bottom: 1px solid #e1e4e8; padding: 8px 12px; text-align: left; font-weight: 600; color: #6a737d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f6f8fa; }
+    .url-cell { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .url-cell a { color: #0366d6; text-decoration: none; font-size: 12px; }
+
+    /* ── 2-col grid ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── SSL key-value ── */
+    .kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .kv-item .k { font-size: 11px; color: #6a737d; text-transform: uppercase; letter-spacing: 0.4px; }
+    .kv-item .v { font-size: 14px; font-weight: 500; margin-top: 2px; }
+
+    /* ── Device grid ── */
+    .device-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .device-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; padding: 14px 10px; text-align: center; }
+    .device-card .device-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .device-card .device-size { font-size: 11px; color: #6a737d; margin-bottom: 8px; }
+
+    /* ── Cookie audit table ── */
+    .cookie-ok   { background: #dcffe4; }
+    .cookie-warn { background: #fff5b1; }
+    .cookie-fail { background: #ffeef0; }
+
+    /* ── Deductions ── */
+    .deduction-list { list-style: none; }
+    .deduction-list li { padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #d73a49; }
+    .deduction-list li:last-child { border-bottom: none; }
+
+    /* ── Issue list ── */
+    .issue-item { padding: 10px 14px; border-left: 3px solid #e1e4e8; margin-bottom: 8px; border-radius: 0 4px 4px 0; background: #fff; }
+    .issue-item.HIGH   { border-left-color: #d73a49; background: #fff5f5; }
+    .issue-item.MEDIUM { border-left-color: #e36209; background: #fffbf0; }
+    .issue-item.LOW    { border-left-color: #2188ff; background: #f1f8ff; }
+    .issue-item .issue-title { font-size: 13px; font-weight: 600; }
+    .issue-item .issue-fix   { font-size: 12px; color: #6a737d; margin-top: 4px; }
+
+    footer { text-align: center; font-size: 12px; color: #6a737d; padding: 24px; border-top: 1px solid #e1e4e8; margin-top: 48px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <h1>🔍 Website Health &amp; Security Report</h1>
+  <p>{{ meta.url }} &nbsp;·&nbsp; Scanned on {{ meta.scanned_at }}</p>
+</header>
+
+<!-- ── Navigation Tabs ── -->
+<nav class="tabs">
+  <a onclick="showTab('overview')"    class="active"  id="tab-overview">Overview</a>
+  <a onclick="showTab('links')"                       id="tab-links">Links</a>
+  <a onclick="showTab('ssl')"                         id="tab-ssl">SSL &amp; HTTPS</a>
+  <a onclick="showTab('headers')"                     id="tab-headers">Headers</a>
+  <a onclick="showTab('forms')"                       id="tab-forms">Forms</a>
+  <a onclick="showTab('responsive')"                  id="tab-responsive">Responsive</a>
+  <a onclick="showTab('compliance')"                  id="tab-compliance">Cookies &amp; GDPR</a>
+</nav>
+
+<main>
+
+<!-- ════════════════════════════════════════════════════
+     TAB 1 — OVERVIEW
+     ════════════════════════════════════════════════════ -->
+<section id="overview" class="active">
+  <h2>📊 Overall Score</h2>
+  <div class="score-grid">
+    <div class="score-card">
+      <div class="number grade-{{ overall.grade }}">{{ overall.score }}<span style="font-size:16px">/100</span></div>
+      <div class="label">Health Score</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-{{ overall.grade }}">{{ overall.grade }}</div>
+      <div class="label">Grade</div>
+    </div>
+    <div class="score-card">
+      <div class="number">{{ crawl.pages_found }}</div>
+      <div class="label">Pages Crawled</div>
+    </div>
+    <div class="score-card">
+      <div class="number {% if links.summary.broken > 0 %}grade-F{% else %}grade-A{% endif %}">{{ links.summary.broken }}</div>
+      <div class="label">Broken Links</div>
+    </div>
+    <div class="score-card">
+      <div class="number {% if not ssl.ssl_certificate.valid %}grade-F{% else %}grade-A{% endif %}">{{ "YES" if ssl.ssl_certificate.valid else "NO" }}</div>
+      <div class="label">SSL Valid</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-{{ 'A' if headers.summary.grade == 'A' else 'B' if headers.summary.grade == 'B' else 'C' if headers.summary.grade == 'C' else 'F' }}">{{ headers.summary.score }}<span style="font-size:16px">/100</span></div>
+      <div class="label">Header Score</div>
+    </div>
+    <div class="score-card">
+      <div class="number {% if forms.summary.high_risk > 0 %}grade-F{% elif forms.summary.medium_risk > 0 %}grade-C{% else %}grade-A{% endif %}">{{ forms.summary.total_forms }}</div>
+      <div class="label">Forms Found</div>
+    </div>
+    <div class="score-card">
+      <div class="number {% if responsive.summary.total_fail > 0 %}grade-F{% elif responsive.summary.total_warn > 0 %}grade-C{% else %}grade-A{% endif %}">{{ responsive.summary.overall }}</div>
+      <div class="label">Mobile</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-{{ 'A' if compliance.summary.avg_gdpr_score >= 75 else 'C' if compliance.summary.avg_gdpr_score >= 50 else 'F' }}">{{ compliance.summary.avg_gdpr_score }}<span style="font-size:16px">/100</span></div>
+      <div class="label">GDPR Score</div>
+    </div>
+  </div>
+
+  {% if overall.deductions %}
+  <div class="card" style="margin-top:20px">
+    <div class="card-title">Score Deductions</div>
+    <ul class="deduction-list">
+      {% for d in overall.deductions %}<li>{{ d }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Quick summary table -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Quick Summary</div>
+    <table>
+      <tr><td>Pages Crawled</td><td><strong>{{ crawl.pages_found }}</strong></td><td>Links Checked</td><td><strong>{{ links.summary.total }}</strong></td></tr>
+      <tr><td>Broken Links</td><td><span class="badge {% if links.summary.broken > 0 %}badge-fail{% else %}badge-ok{% endif %}">{{ links.summary.broken }}</span></td><td>Redirects</td><td><span class="badge badge-redirect">{{ links.summary.redirects }}</span></td></tr>
+      <tr><td>SSL Valid</td><td><span class="badge {% if ssl.ssl_certificate.valid %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if ssl.ssl_certificate.valid else "NO" }}</span></td><td>SSL Days Left</td><td>{{ ssl.ssl_certificate.days_remaining }} days</td></tr>
+      <tr><td>Security Headers</td><td><span class="badge badge-{{ 'ok' if headers.summary.grade in ['A','B'] else 'warn' if headers.summary.grade == 'C' else 'fail' }}">{{ headers.summary.grade }} ({{ headers.summary.score }}/100)</span></td><td>Missing Headers</td><td>{{ headers.summary.missing_count }}</td></tr>
+      <tr><td>Forms Found</td><td>{{ forms.summary.total_forms }}</td><td>High Risk Forms</td><td><span class="badge {% if forms.summary.high_risk > 0 %}badge-fail{% else %}badge-ok{% endif %}">{{ forms.summary.high_risk }}</span></td></tr>
+      <tr><td>Mobile Result</td><td><span class="badge badge-{{ 'fail' if responsive.summary.overall == 'FAIL' else 'warn' if responsive.summary.overall == 'WARN' else 'ok' }}">{{ responsive.summary.overall }}</span></td><td>Devices Tested</td><td>{{ responsive.summary.viewports_tested }}</td></tr>
+      <tr><td>Cookie Banner</td><td><span class="badge {% if compliance.summary.has_cookie_banner %}badge-ok{% else %}badge-fail{% endif %}">{{ "FOUND" if compliance.summary.has_cookie_banner else "MISSING" }}</span></td><td>GDPR Score</td><td>{{ compliance.summary.avg_gdpr_score }}/100</td></tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 2 — LINKS
+     ════════════════════════════════════════════════════ -->
+<section id="links">
+  <h2>🔗 Link Check Results</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number">{{ links.summary.total }}</div><div class="label">Total Links</div></div>
+    <div class="score-card"><div class="number grade-A">{{ links.summary.ok }}</div><div class="label">OK</div></div>
+    <div class="score-card"><div class="number {% if links.summary.broken > 0 %}grade-F{% else %}grade-A{% endif %}">{{ links.summary.broken }}</div><div class="label">Broken</div></div>
+    <div class="score-card"><div class="number c-blue">{{ links.summary.redirects }}</div><div class="label">Redirects</div></div>
+    <div class="score-card"><div class="number {% if links.summary.errors > 0 %}grade-C{% else %}grade-A{% endif %}">{{ links.summary.errors }}</div><div class="label">Errors</div></div>
+  </div>
+
+  {% set non_ok = links.results | selectattr("status_label", "ne", "OK") | list %}
+  {% if non_ok %}
+  <div class="card">
+    <div class="card-title">Issues Found ({{ non_ok | length }})</div>
+    <table>
+      <thead><tr><th>URL</th><th>Status</th><th>Code</th><th>Found On</th></tr></thead>
+      <tbody>
+        {% for r in non_ok %}
+        <tr>
+          <td class="url-cell"><a href="{{ r.url }}" target="_blank">{{ r.url }}</a></td>
+          <td><span class="badge badge-{{ r.status_label | lower | replace(' ', '-') }}">{{ r.status_label }}</span></td>
+          <td>{{ r.status_code or "N/A" }}</td>
+          <td class="url-cell"><a href="{{ r.found_on }}" target="_blank">{{ r.found_on }}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card"><span class="badge badge-ok">✓ All links are healthy</span></div>
+  {% endif %}
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 3 — SSL
+     ════════════════════════════════════════════════════ -->
+<section id="ssl">
+  <h2>🔒 SSL &amp; HTTPS</h2>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Certificate Info</div>
+      <div class="kv-grid">
+        <div class="kv-item"><div class="k">HTTPS Redirect</div><div class="v"><span class="badge {% if ssl.https_redirect.redirects_to_https %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if ssl.https_redirect.redirects_to_https else "NO" }}</span></div></div>
+        <div class="kv-item"><div class="k">SSL Valid</div><div class="v"><span class="badge {% if ssl.ssl_certificate.valid %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if ssl.ssl_certificate.valid else "NO" }}</span></div></div>
+        {% if ssl.ssl_certificate.valid %}
+        <div class="kv-item"><div class="k">Common Name</div><div class="v">{{ ssl.ssl_certificate.common_name }}</div></div>
+        <div class="kv-item"><div class="k">Issued By</div><div class="v">{{ ssl.ssl_certificate.issued_by }}</div></div>
+        <div class="kv-item"><div class="k">Expires On</div><div class="v">{{ ssl.ssl_certificate.expires_on }}</div></div>
+        <div class="kv-item"><div class="k">Days Remaining</div>
+          <div class="v">{{ ssl.ssl_certificate.days_remaining }}
+            <span class="badge badge-{{ 'ok' if ssl.ssl_certificate.expiry_status == 'OK' else 'warn' if ssl.ssl_certificate.expiry_status == 'WARNING' else 'fail' }}">{{ ssl.ssl_certificate.expiry_status }}</span>
+          </div>
+        </div>
+        {% else %}
+        <div class="kv-item" style="grid-column:span 2"><div class="k">Error</div><div class="v c-red">{{ ssl.ssl_certificate.error }}</div></div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Security Headers (SSL-related)</div>
+      <table>
+        <thead><tr><th>Header</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for header, info in ssl.security_headers.items() %}
+          {% if info is mapping %}
+          <tr>
+            <td style="font-family:monospace;font-size:12px">{{ header }}</td>
+            <td><span class="badge badge-{{ 'ok' if info.present else 'missing' }}">{{ info.status }}</span></td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 4 — HEADERS
+     ════════════════════════════════════════════════════ -->
+<section id="headers">
+  <h2>🛡️ Security Headers</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number grade-{{ 'A' if headers.summary.grade == 'A' else 'B' if headers.summary.grade == 'B' else 'C' if headers.summary.grade == 'C' else 'F' }}">{{ headers.summary.score }}/100</div><div class="label">Score</div></div>
+    <div class="score-card"><div class="number grade-{{ 'A' if headers.summary.grade == 'A' else 'B' if headers.summary.grade == 'B' else 'C' if headers.summary.grade == 'C' else 'F' }}">{{ headers.summary.grade }}</div><div class="label">Grade</div></div>
+    <div class="score-card"><div class="number grade-A">{{ headers.summary.present_count }}</div><div class="label">Present</div></div>
+    <div class="score-card"><div class="number {% if headers.summary.missing_count > 0 %}grade-F{% else %}grade-A{% endif %}">{{ headers.summary.missing_count }}</div><div class="label">Missing</div></div>
+    <div class="score-card"><div class="number {% if headers.summary.info_leaks > 0 %}grade-C{% else %}grade-A{% endif %}">{{ headers.summary.info_leaks }}</div><div class="label">Info Leaks</div></div>
+  </div>
+
+  {% if headers.missing_headers %}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">❌ Missing Headers</div>
+    {% for h in headers.missing_headers %}
+    <div class="issue-item {{ h.severity }}">
+      <div class="issue-title"><span class="badge badge-{{ h.severity | lower }}">{{ h.severity }}</span> &nbsp;{{ h.header }}</div>
+      <div class="issue-fix">{{ h.recommendation }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if headers.info_leak_headers %}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">⚠️ Information Leaking Headers — Remove These</div>
+    <table>
+      <thead><tr><th>Header</th><th>Value</th><th>Risk</th></tr></thead>
+      <tbody>
+        {% for h in headers.info_leak_headers %}
+        <tr>
+          <td style="font-family:monospace;font-size:12px">{{ h.header }}</td>
+          <td style="font-size:12px">{{ h.value }}</td>
+          <td style="font-size:12px;color:#6a737d">{{ h.reason }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if headers.present_headers %}
+  <div class="card">
+    <div class="card-title">✅ Present Headers</div>
+    <table>
+      <thead><tr><th>Header</th><th>Value</th></tr></thead>
+      <tbody>
+        {% for h in headers.present_headers %}
+        <tr>
+          <td style="font-family:monospace;font-size:12px">{{ h.header }}</td>
+          <td style="font-size:12px;color:#6a737d;word-break:break-all">{{ h.value[:80] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 5 — FORMS
+     ════════════════════════════════════════════════════ -->
+<section id="forms">
+  <h2>📋 Form Security (Selenium)</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number">{{ forms.summary.total_forms }}</div><div class="label">Total Forms</div></div>
+    <div class="score-card"><div class="number {% if forms.summary.high_risk > 0 %}grade-F{% else %}grade-A{% endif %}">{{ forms.summary.high_risk }}</div><div class="label">High Risk</div></div>
+    <div class="score-card"><div class="number {% if forms.summary.medium_risk > 0 %}grade-C{% else %}grade-A{% endif %}">{{ forms.summary.medium_risk }}</div><div class="label">Medium Risk</div></div>
+    <div class="score-card"><div class="number {% if forms.summary.missing_csrf > 0 %}grade-C{% else %}grade-A{% endif %}">{{ forms.summary.missing_csrf }}</div><div class="label">Missing CSRF</div></div>
+    <div class="score-card"><div class="number {% if forms.summary.http_submissions > 0 %}grade-F{% else %}grade-A{% endif %}">{{ forms.summary.http_submissions }}</div><div class="label">HTTP Submit</div></div>
+    <div class="score-card"><div class="number">{{ forms.summary.password_forms }}</div><div class="label">Password Forms</div></div>
+  </div>
+
+  {% for page in forms.pages %}
+    {% if page.forms %}
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 {{ page.url }}</div>
+      {% for form in page.forms %}
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #{{ loop.index }} — {{ form.method }}</strong>
+          <span class="badge badge-{{ 'fail' if form.severity == 'HIGH' else 'warn' if form.severity == 'MEDIUM' else 'low' if form.severity == 'LOW' else 'ok' }}">{{ form.severity }}</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">{{ form.action }}</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>{{ form.method }}</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge {% if form.has_password %}badge-warn{% else %}badge-ok{% endif %}">{{ "YES" if form.has_password else "NO" }}</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge {% if form.has_csrf_token %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if form.has_csrf_token else "MISSING" }}</span></td></tr>
+        </table>
+        {% for issue in form.issues %}
+        <div class="issue-item {{ form.severity }}" style="margin-top:4px">
+          <div class="issue-title">{{ issue }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endfor %}
+
+  {% if forms.summary.total_forms == 0 %}
+  <div class="card"><span class="badge badge-info">No forms detected on crawled pages</span></div>
+  {% endif %}
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 6 — RESPONSIVE
+     ════════════════════════════════════════════════════ -->
+<section id="responsive">
+  <h2>📱 Mobile Responsiveness (Selenium)</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number">{{ responsive.summary.pages_tested }}</div><div class="label">Pages Tested</div></div>
+    <div class="score-card"><div class="number grade-A">{{ responsive.summary.total_pass }}</div><div class="label">Pass</div></div>
+    <div class="score-card"><div class="number grade-C">{{ responsive.summary.total_warn }}</div><div class="label">Warn</div></div>
+    <div class="score-card"><div class="number grade-F">{{ responsive.summary.total_fail }}</div><div class="label">Fail</div></div>
+    <div class="score-card"><div class="number {% if responsive.summary.h_scroll_pages > 0 %}grade-F{% else %}grade-A{% endif %}">{{ responsive.summary.h_scroll_pages }}</div><div class="label">H-Scroll</div></div>
+    <div class="score-card"><div class="number {% if responsive.summary.missing_meta_pages > 0 %}grade-F{% else %}grade-A{% endif %}">{{ responsive.summary.missing_meta_pages }}</div><div class="label">No Meta Tag</div></div>
+  </div>
+
+  {% for page in responsive.pages %}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 {{ page.url }}</div>
+    <div class="device-grid" style="margin-bottom:14px">
+      {% for v in page.viewports %}
+      <div class="device-card">
+        <div class="device-name">{{ v.device }}</div>
+        <div class="device-size">{{ v.width }}×{{ v.height }}</div>
+        <span class="badge badge-{{ 'ok' if v.status == 'PASS' else 'warn' if v.status == 'WARN' else 'fail' }}">{{ v.status }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% for v in page.viewports %}
+      {% if v.issues %}
+        {% for issue in v.issues %}
+        {% if issue.severity != "INFO" %}
+        <div class="issue-item {{ issue.severity }}" style="margin-bottom:6px">
+          <div class="issue-title"><strong>{{ v.device }}</strong> — <span class="badge badge-{{ issue.severity | lower }}">{{ issue.severity }}</span> {{ issue.type }}</div>
+          <div class="issue-fix">{{ issue.detail }}</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: {{ issue.fix }}</div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 7 — COOKIES & GDPR
+     ════════════════════════════════════════════════════ -->
+<section id="compliance">
+  <h2>🍪 Cookies &amp; GDPR Compliance (Selenium)</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number grade-{{ 'A' if compliance.summary.avg_gdpr_score >= 90 else 'B' if compliance.summary.avg_gdpr_score >= 75 else 'C' if compliance.summary.avg_gdpr_score >= 50 else 'F' }}">{{ compliance.summary.avg_gdpr_score }}<span style="font-size:16px">/100</span></div><div class="label">GDPR Score</div></div>
+    <div class="score-card"><div class="number {% if compliance.summary.has_cookie_banner %}grade-A{% else %}grade-F{% endif %}">{{ "YES" if compliance.summary.has_cookie_banner else "NO" }}</div><div class="label">Cookie Banner</div></div>
+    <div class="score-card"><div class="number {% if compliance.summary.has_reject_option %}grade-A{% else %}grade-F{% endif %}">{{ "YES" if compliance.summary.has_reject_option else "NO" }}</div><div class="label">Reject Option</div></div>
+    <div class="score-card"><div class="number {% if compliance.summary.total_popups > 0 %}grade-C{% else %}grade-A{% endif %}">{{ compliance.summary.total_popups }}</div><div class="label">Popups</div></div>
+    <div class="score-card"><div class="number">{{ compliance.summary.total_cookies }}</div><div class="label">Cookies Found</div></div>
+    <div class="score-card"><div class="number {% if compliance.summary.high_risk_cookies > 0 %}grade-F{% else %}grade-A{% endif %}">{{ compliance.summary.high_risk_cookies }}</div><div class="label">High Risk</div></div>
+  </div>
+
+  {% for page in compliance.pages %}
+  {% if not page.get('error') %}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 {{ page.url }} — GDPR Score: {{ page.gdpr_score }}/100
+      <span class="badge badge-{{ 'ok' if page.gdpr_score >= 75 else 'warn' if page.gdpr_score >= 50 else 'fail' }}">{{ page.gdpr_grade }}</span>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div style="margin-bottom:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Banner</strong>
+      <div style="margin-top:6px">
+        {% if page.cookie_banner.found %}
+        <span class="badge badge-ok">DETECTED</span>
+        &nbsp;Accept: <span class="badge {% if page.cookie_banner.has_accept_btn %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if page.cookie_banner.has_accept_btn else "NO" }}</span>
+        &nbsp;Reject: <span class="badge {% if page.cookie_banner.has_reject_btn %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if page.cookie_banner.has_reject_btn else "NO" }}</span>
+        &nbsp;Preferences: <span class="badge {% if page.cookie_banner.has_preferences %}badge-ok{% else %}badge-warn{% endif %}">{{ "YES" if page.cookie_banner.has_preferences else "NO" }}</span>
+        {% else %}
+        <span class="badge badge-fail">NOT FOUND</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Popups -->
+    {% if page.popups %}
+    <div style="margin-bottom:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Popups Detected</strong>
+      {% for popup in page.popups %}
+      <div class="issue-item {{ popup.severity }}" style="margin-top:6px">
+        <div class="issue-title">{{ popup.type }} — Close button: {{ "YES" if popup.has_close_btn else "NO" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Cookie audit -->
+    {% if page.cookie_audit.cookies %}
+    <div>
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Security Audit</strong>
+      <table style="margin-top:8px">
+        <thead><tr><th>Cookie Name</th><th>Secure</th><th>HttpOnly</th><th>SameSite</th><th>Risk</th></tr></thead>
+        <tbody>
+          {% for c in page.cookie_audit.cookies %}
+          <tr>
+            <td style="font-family:monospace;font-size:12px">{{ c.name }}</td>
+            <td><span class="badge {% if c.secure %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if c.secure else "NO" }}</span></td>
+            <td><span class="badge {% if c.httpOnly %}badge-ok{% else %}badge-fail{% endif %}">{{ "YES" if c.httpOnly else "NO" }}</span></td>
+            <td><span class="badge {% if c.sameSite and c.sameSite != 'Not set' %}badge-ok{% else %}badge-warn{% endif %}">{{ c.sameSite }}</span></td>
+            <td><span class="badge badge-{{ 'ok' if c.severity == 'OK' else 'warn' if c.severity == 'MEDIUM' else 'fail' }}">{{ c.severity }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- GDPR Issues -->
+    {% if page.issues %}
+    <div style="margin-top:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Issues</strong>
+      {% for issue in page.issues %}
+      <div class="issue-item {{ issue.severity }}" style="margin-top:6px">
+        <div class="issue-title">{{ issue.issue }}</div>
+        <div class="issue-fix">Fix: {{ issue.fix }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% endfor %}
+</section>
+
+</main>
+
+<footer>Generated by Website Health &amp; Security Checker &nbsp;·&nbsp; {{ generated_at }}</footer>
+
+<script>
+function showTab(name) {
+  // Hide all sections
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.remove('active'));
+  // Show selected
+  document.getElementById(name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+// Activate overview by default
+showTab('overview');
+</script>
+</body>
+</html>

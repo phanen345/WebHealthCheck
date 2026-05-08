@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Health Report — https://www.justwravel.com/</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f4f5f7; color: #24292e; font-size: 14px; line-height: 1.6; }
+
+    /* ── Header ── */
+    header { background: #1a1f2e; color: #fff; padding: 28px 40px; }
+    header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    header p  { font-size: 13px; color: #8b949e; }
+
+    /* ── Nav Tabs ── */
+    nav.tabs { background: #fff; border-bottom: 1px solid #e1e4e8; padding: 0 40px; display: flex; gap: 0; position: sticky; top: 0; z-index: 100; }
+    nav.tabs a { display: inline-block; padding: 12px 16px; font-size: 13px; font-weight: 500; color: #6a737d; text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.2s; cursor: pointer; }
+    nav.tabs a:hover { color: #24292e; }
+    nav.tabs a.active { color: #0366d6; border-bottom-color: #0366d6; }
+
+    /* ── Layout ── */
+    main { max-width: 1100px; margin: 32px auto; padding: 0 24px 80px; }
+    section { margin-bottom: 36px; display: none; }
+    section.active { display: block; }
+
+    /* ── Section Header ── */
+    h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e1e4e8; color: #24292e; display: flex; align-items: center; gap: 8px; }
+
+    /* ── Cards ── */
+    .card { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; }
+    .card-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #24292e; }
+
+    /* ── Score Grid ── */
+    .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+    .score-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; text-align: center; }
+    .score-card .number { font-size: 32px; font-weight: 700; line-height: 1.1; }
+    .score-card .label  { font-size: 11px; color: #6a737d; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* ── Grade colors ── */
+    .grade-A, .c-green  { color: #22863a; }
+    .grade-B, .c-blue   { color: #2188ff; }
+    .grade-C, .c-yellow { color: #e36209; }
+    .grade-D, .grade-F, .c-red { color: #d73a49; }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    .badge-ok       { background: #dcffe4; color: #1a7f37; }
+    .badge-pass     { background: #dcffe4; color: #1a7f37; }
+    .badge-broken   { background: #ffeef0; color: #86181d; }
+    .badge-fail     { background: #ffeef0; color: #86181d; }
+    .badge-warn     { background: #fff5b1; color: #735c0f; }
+    .badge-warning  { background: #fff5b1; color: #735c0f; }
+    .badge-error    { background: #ffeef0; color: #86181d; }
+    .badge-missing  { background: #ffeef0; color: #86181d; }
+    .badge-present  { background: #dcffe4; color: #1a7f37; }
+    .badge-redirect { background: #dbedff; color: #0366d6; }
+    .badge-medium   { background: #fff5b1; color: #735c0f; }
+    .badge-high     { background: #ffeef0; color: #86181d; }
+    .badge-low      { background: #f1f8ff; color: #0366d6; }
+    .badge-info     { background: #f6f8fa; color: #6a737d; }
+    .badge-yes      { background: #dcffe4; color: #1a7f37; }
+    .badge-no       { background: #ffeef0; color: #86181d; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f6f8fa; border-bottom: 1px solid #e1e4e8; padding: 8px 12px; text-align: left; font-weight: 600; color: #6a737d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f6f8fa; }
+    .url-cell { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .url-cell a { color: #0366d6; text-decoration: none; font-size: 12px; }
+
+    /* ── 2-col grid ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── SSL key-value ── */
+    .kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .kv-item .k { font-size: 11px; color: #6a737d; text-transform: uppercase; letter-spacing: 0.4px; }
+    .kv-item .v { font-size: 14px; font-weight: 500; margin-top: 2px; }
+
+    /* ── Device grid ── */
+    .device-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .device-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; padding: 14px 10px; text-align: center; }
+    .device-card .device-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .device-card .device-size { font-size: 11px; color: #6a737d; margin-bottom: 8px; }
+
+    /* ── Cookie audit table ── */
+    .cookie-ok   { background: #dcffe4; }
+    .cookie-warn { background: #fff5b1; }
+    .cookie-fail { background: #ffeef0; }
+
+    /* ── Deductions ── */
+    .deduction-list { list-style: none; }
+    .deduction-list li { padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #d73a49; }
+    .deduction-list li:last-child { border-bottom: none; }
+
+    /* ── Issue list ── */
+    .issue-item { padding: 10px 14px; border-left: 3px solid #e1e4e8; margin-bottom: 8px; border-radius: 0 4px 4px 0; background: #fff; }
+    .issue-item.HIGH   { border-left-color: #d73a49; background: #fff5f5; }
+    .issue-item.MEDIUM { border-left-color: #e36209; background: #fffbf0; }
+    .issue-item.LOW    { border-left-color: #2188ff; background: #f1f8ff; }
+    .issue-item .issue-title { font-size: 13px; font-weight: 600; }
+    .issue-item .issue-fix   { font-size: 12px; color: #6a737d; margin-top: 4px; }
+
+    footer { text-align: center; font-size: 12px; color: #6a737d; padding: 24px; border-top: 1px solid #e1e4e8; margin-top: 48px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <h1>🔍 Website Health &amp; Security Report</h1>
+  <p>https://www.justwravel.com/ &nbsp;·&nbsp; Scanned on 2026-05-07 17:17:45</p>
+</header>
+
+<!-- ── Navigation Tabs ── -->
+<nav class="tabs">
+  <a onclick="showTab('overview')"    class="active"  id="tab-overview">Overview</a>
+  <a onclick="showTab('links')"                       id="tab-links">Links</a>
+  <a onclick="showTab('ssl')"                         id="tab-ssl">SSL &amp; HTTPS</a>
+  <a onclick="showTab('headers')"                     id="tab-headers">Headers</a>
+  <a onclick="showTab('forms')"                       id="tab-forms">Forms</a>
+  <a onclick="showTab('responsive')"                  id="tab-responsive">Responsive</a>
+  <a onclick="showTab('compliance')"                  id="tab-compliance">Cookies &amp; GDPR</a>
+</nav>
+
+<main>
+
+<!-- ════════════════════════════════════════════════════
+     TAB 1 — OVERVIEW
+     ════════════════════════════════════════════════════ -->
+<section id="overview" class="active">
+  <h2>📊 Overall Score</h2>
+  <div class="score-grid">
+    <div class="score-card">
+      <div class="number grade-B">84<span style="font-size:16px">/100</span></div>
+      <div class="label">Health Score</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-B">B</div>
+      <div class="label">Grade</div>
+    </div>
+    <div class="score-card">
+      <div class="number">10</div>
+      <div class="label">Pages Crawled</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-A">0</div>
+      <div class="label">Broken Links</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-A">YES</div>
+      <div class="label">SSL Valid</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-F">45<span style="font-size:16px">/100</span></div>
+      <div class="label">Header Score</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-C">16</div>
+      <div class="label">Forms Found</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-F">FAIL</div>
+      <div class="label">Mobile</div>
+    </div>
+    <div class="score-card">
+      <div class="number grade-C">51<span style="font-size:16px">/100</span></div>
+      <div class="label">GDPR Score</div>
+    </div>
+  </div>
+
+  
+  <div class="card" style="margin-top:20px">
+    <div class="card-title">Score Deductions</div>
+    <ul class="deduction-list">
+      <li>-16 pts: Missing security headers</li>
+    </ul>
+  </div>
+  
+
+  <!-- Quick summary table -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Quick Summary</div>
+    <table>
+      <tr><td>Pages Crawled</td><td><strong>10</strong></td><td>Links Checked</td><td><strong>248</strong></td></tr>
+      <tr><td>Broken Links</td><td><span class="badge badge-ok">0</span></td><td>Redirects</td><td><span class="badge badge-redirect">0</span></td></tr>
+      <tr><td>SSL Valid</td><td><span class="badge badge-ok">YES</span></td><td>SSL Days Left</td><td>72 days</td></tr>
+      <tr><td>Security Headers</td><td><span class="badge badge-fail">D (45/100)</span></td><td>Missing Headers</td><td>6</td></tr>
+      <tr><td>Forms Found</td><td>16</td><td>High Risk Forms</td><td><span class="badge badge-ok">0</span></td></tr>
+      <tr><td>Mobile Result</td><td><span class="badge badge-fail">FAIL</span></td><td>Devices Tested</td><td>25</td></tr>
+      <tr><td>Cookie Banner</td><td><span class="badge badge-ok">FOUND</span></td><td>GDPR Score</td><td>51/100</td></tr>
+    </table>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 2 — LINKS
+     ════════════════════════════════════════════════════ -->
+<section id="links">
+  <h2>🔗 Link Check Results</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number">248</div><div class="label">Total Links</div></div>
+    <div class="score-card"><div class="number grade-A">248</div><div class="label">OK</div></div>
+    <div class="score-card"><div class="number grade-A">0</div><div class="label">Broken</div></div>
+    <div class="score-card"><div class="number c-blue">0</div><div class="label">Redirects</div></div>
+    <div class="score-card"><div class="number grade-A">0</div><div class="label">Errors</div></div>
+  </div>
+
+  
+  
+  <div class="card"><span class="badge badge-ok">✓ All links are healthy</span></div>
+  
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 3 — SSL
+     ════════════════════════════════════════════════════ -->
+<section id="ssl">
+  <h2>🔒 SSL &amp; HTTPS</h2>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Certificate Info</div>
+      <div class="kv-grid">
+        <div class="kv-item"><div class="k">HTTPS Redirect</div><div class="v"><span class="badge badge-ok">YES</span></div></div>
+        <div class="kv-item"><div class="k">SSL Valid</div><div class="v"><span class="badge badge-ok">YES</span></div></div>
+        
+        <div class="kv-item"><div class="k">Common Name</div><div class="v">www.justwravel.com</div></div>
+        <div class="kv-item"><div class="k">Issued By</div><div class="v">Let's Encrypt</div></div>
+        <div class="kv-item"><div class="k">Expires On</div><div class="v">2026-07-18</div></div>
+        <div class="kv-item"><div class="k">Days Remaining</div>
+          <div class="v">72
+            <span class="badge badge-ok">OK</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Security Headers (SSL-related)</div>
+      <table>
+        <thead><tr><th>Header</th><th>Status</th></tr></thead>
+        <tbody>
+          
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">Strict-Transport-Security</td>
+            <td><span class="badge badge-ok">OK</span></td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">Content-Security-Policy</td>
+            <td><span class="badge badge-missing">MISSING</span></td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">X-Frame-Options</td>
+            <td><span class="badge badge-missing">MISSING</span></td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">X-Content-Type-Options</td>
+            <td><span class="badge badge-missing">MISSING</span></td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">Referrer-Policy</td>
+            <td><span class="badge badge-missing">MISSING</span></td>
+          </tr>
+          
+          
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">Permissions-Policy</td>
+            <td><span class="badge badge-missing">MISSING</span></td>
+          </tr>
+          
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 4 — HEADERS
+     ════════════════════════════════════════════════════ -->
+<section id="headers">
+  <h2>🛡️ Security Headers</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number grade-F">45/100</div><div class="label">Score</div></div>
+    <div class="score-card"><div class="number grade-F">D</div><div class="label">Grade</div></div>
+    <div class="score-card"><div class="number grade-A">2</div><div class="label">Present</div></div>
+    <div class="score-card"><div class="number grade-F">6</div><div class="label">Missing</div></div>
+    <div class="score-card"><div class="number grade-C">2</div><div class="label">Info Leaks</div></div>
+  </div>
+
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">❌ Missing Headers</div>
+    
+    <div class="issue-item HIGH">
+      <div class="issue-title"><span class="badge badge-high">HIGH</span> &nbsp;Content-Security-Policy</div>
+      <div class="issue-fix">Add: Content-Security-Policy: default-src 'self'</div>
+    </div>
+    
+    <div class="issue-item MEDIUM">
+      <div class="issue-title"><span class="badge badge-medium">MEDIUM</span> &nbsp;X-Frame-Options</div>
+      <div class="issue-fix">Add: X-Frame-Options: DENY or SAMEORIGIN</div>
+    </div>
+    
+    <div class="issue-item MEDIUM">
+      <div class="issue-title"><span class="badge badge-medium">MEDIUM</span> &nbsp;X-Content-Type-Options</div>
+      <div class="issue-fix">Add: X-Content-Type-Options: nosniff</div>
+    </div>
+    
+    <div class="issue-item LOW">
+      <div class="issue-title"><span class="badge badge-low">LOW</span> &nbsp;Referrer-Policy</div>
+      <div class="issue-fix">Add: Referrer-Policy: no-referrer-when-downgrade</div>
+    </div>
+    
+    <div class="issue-item LOW">
+      <div class="issue-title"><span class="badge badge-low">LOW</span> &nbsp;Permissions-Policy</div>
+      <div class="issue-fix">Add: Permissions-Policy: geolocation=(), microphone=()</div>
+    </div>
+    
+    <div class="issue-item LOW">
+      <div class="issue-title"><span class="badge badge-low">LOW</span> &nbsp;X-XSS-Protection</div>
+      <div class="issue-fix">Add: X-XSS-Protection: 1; mode=block</div>
+    </div>
+    
+  </div>
+  
+
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">⚠️ Information Leaking Headers — Remove These</div>
+    <table>
+      <thead><tr><th>Header</th><th>Value</th><th>Risk</th></tr></thead>
+      <tbody>
+        
+        <tr>
+          <td style="font-family:monospace;font-size:12px">Server</td>
+          <td style="font-size:12px">nginx/1.24.0 (Ubuntu)</td>
+          <td style="font-size:12px;color:#6a737d">Exposes server software and version (e.g., Apache/2.4.1)</td>
+        </tr>
+        
+        <tr>
+          <td style="font-family:monospace;font-size:12px">X-Powered-By</td>
+          <td style="font-size:12px">Next.js</td>
+          <td style="font-size:12px;color:#6a737d">Exposes backend technology (e.g., PHP/7.4)</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+  <div class="card">
+    <div class="card-title">✅ Present Headers</div>
+    <table>
+      <thead><tr><th>Header</th><th>Value</th></tr></thead>
+      <tbody>
+        
+        <tr>
+          <td style="font-family:monospace;font-size:12px">Strict-Transport-Security</td>
+          <td style="font-size:12px;color:#6a737d;word-break:break-all">max-age=31536000; includeSubDomains; preload</td>
+        </tr>
+        
+        <tr>
+          <td style="font-family:monospace;font-size:12px">Cache-Control</td>
+          <td style="font-size:12px;color:#6a737d;word-break:break-all">private, no-cache, no-store, max-age=0, must-revalidate</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 5 — FORMS
+     ════════════════════════════════════════════════════ -->
+<section id="forms">
+  <h2>📋 Form Security (Selenium)</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number">16</div><div class="label">Total Forms</div></div>
+    <div class="score-card"><div class="number grade-A">0</div><div class="label">High Risk</div></div>
+    <div class="score-card"><div class="number grade-C">4</div><div class="label">Medium Risk</div></div>
+    <div class="score-card"><div class="number grade-C">4</div><div class="label">Missing CSRF</div></div>
+    <div class="score-card"><div class="number grade-A">0</div><div class="label">HTTP Submit</div></div>
+    <div class="score-card"><div class="number">0</div><div class="label">Password Forms</div></div>
+  </div>
+
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/blog/girls-trip-with-justwravel-best-group-travel-option</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #2 — POST</strong>
+          <span class="badge badge-warn">MEDIUM</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/wp-comments-post.php</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>POST</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item MEDIUM" style="margin-top:4px">
+          <div class="issue-title">POST form missing CSRF token — vulnerable to cross-site request forgery</div>
+        </div>
+        
+      </div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #3 — POST</strong>
+          <span class="badge badge-warn">MEDIUM</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/girls-trip-with-justwravel-best-group-travel-option/#es_form_f1-n1</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>POST</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item MEDIUM" style="margin-top:4px">
+          <div class="issue-title">POST form missing CSRF token — vulnerable to cross-site request forgery</div>
+        </div>
+        
+      </div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #4 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/girls-trip-with-justwravel-best-group-travel-option/</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/tour-packages/international/vietnam</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/tour-packages/international/vietnam#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/tour-packages/international/maldives</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/tour-packages/international/maldives#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/blog/outdoor-educational-programme</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #2 — POST</strong>
+          <span class="badge badge-warn">MEDIUM</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/wp-comments-post.php</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>POST</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item MEDIUM" style="margin-top:4px">
+          <div class="issue-title">POST form missing CSRF token — vulnerable to cross-site request forgery</div>
+        </div>
+        
+      </div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #3 — POST</strong>
+          <span class="badge badge-warn">MEDIUM</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/outdoor-educational-programme/#es_form_f1-n1</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>POST</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item MEDIUM" style="margin-top:4px">
+          <div class="issue-title">POST form missing CSRF token — vulnerable to cross-site request forgery</div>
+        </div>
+        
+      </div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #4 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/blog/outdoor-educational-programme/</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/backpacking-trips/india/spiti</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/backpacking-trips/india/spiti#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/tour-packages/international</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/tour-packages/international#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #2 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/tour-packages/international#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/tour-packages/india/jammu-and-kashmir</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/tour-packages/india/jammu-and-kashmir#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">📄 https://www.justwravel.com/login</div>
+      
+      <div style="border:1px solid #e1e4e8;border-radius:6px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong style="font-size:13px">Form #1 — GET</strong>
+          <span class="badge badge-ok">INFO</span>
+        </div>
+        <table style="margin-bottom:8px">
+          <tr><td style="color:#6a737d;width:120px">Action</td><td style="font-family:monospace;font-size:12px">https://www.justwravel.com/login#</td></tr>
+          <tr><td style="color:#6a737d">Method</td><td>GET</td></tr>
+          <tr><td style="color:#6a737d">Password field</td><td><span class="badge badge-ok">NO</span></td></tr>
+          <tr><td style="color:#6a737d">CSRF token</td><td><span class="badge badge-fail">MISSING</span></td></tr>
+        </table>
+        
+        <div class="issue-item INFO" style="margin-top:4px">
+          <div class="issue-title">No critical issues detected</div>
+        </div>
+        
+      </div>
+      
+    </div>
+    
+  
+
+  
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 6 — RESPONSIVE
+     ════════════════════════════════════════════════════ -->
+<section id="responsive">
+  <h2>📱 Mobile Responsiveness (Selenium)</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number">5</div><div class="label">Pages Tested</div></div>
+    <div class="score-card"><div class="number grade-A">0</div><div class="label">Pass</div></div>
+    <div class="score-card"><div class="number grade-C">21</div><div class="label">Warn</div></div>
+    <div class="score-card"><div class="number grade-F">4</div><div class="label">Fail</div></div>
+    <div class="score-card"><div class="number grade-F">1</div><div class="label">H-Scroll</div></div>
+    <div class="score-card"><div class="number grade-F">1</div><div class="label">No Meta Tag</div></div>
+  </div>
+
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/</div>
+    <div class="device-grid" style="margin-bottom:14px">
+      
+      <div class="device-card">
+        <div class="device-name">Mobile S</div>
+        <div class="device-size">320×568</div>
+        <span class="badge badge-fail">FAIL</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile M</div>
+        <div class="device-size">375×667</div>
+        <span class="badge badge-fail">FAIL</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile L</div>
+        <div class="device-size">425×926</div>
+        <span class="badge badge-fail">FAIL</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Tablet</div>
+        <div class="device-size">768×1024</div>
+        <span class="badge badge-fail">FAIL</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Laptop</div>
+        <div class="device-size">1280×800</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+    </div>
+
+    
+      
+        
+        
+        <div class="issue-item HIGH" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-high">HIGH</span> HORIZONTAL SCROLL</div>
+          <div class="issue-fix">Page overflows horizontally — scrollWidth 532px > viewportWidth 467px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Add overflow-x: hidden or fix element widths exceeding viewport</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">77 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+        
+        <div class="issue-item LOW" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-low">LOW</span> FIXED WIDTH ELEMENTS</div>
+          <div class="issue-fix">2 element(s) wider than viewport — likely fixed pixel widths</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Use max-width: 100% and avoid fixed pixel widths in layout</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item HIGH" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-high">HIGH</span> HORIZONTAL SCROLL</div>
+          <div class="issue-fix">Page overflows horizontally — scrollWidth 532px > viewportWidth 467px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Add overflow-x: hidden or fix element widths exceeding viewport</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">77 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+        
+        <div class="issue-item LOW" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-low">LOW</span> FIXED WIDTH ELEMENTS</div>
+          <div class="issue-fix">2 element(s) wider than viewport — likely fixed pixel widths</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Use max-width: 100% and avoid fixed pixel widths in layout</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item HIGH" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-high">HIGH</span> HORIZONTAL SCROLL</div>
+          <div class="issue-fix">Page overflows horizontally — scrollWidth 532px > viewportWidth 467px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Add overflow-x: hidden or fix element widths exceeding viewport</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">77 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+        
+        <div class="issue-item LOW" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-low">LOW</span> FIXED WIDTH ELEMENTS</div>
+          <div class="issue-fix">2 element(s) wider than viewport — likely fixed pixel widths</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Use max-width: 100% and avoid fixed pixel widths in layout</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item HIGH" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-high">HIGH</span> MISSING VIEWPORT META</div>
+          <div class="issue-fix">No <meta name='viewport'> tag found</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Add: <meta name='viewport' content='width=device-width, initial-scale=1'></div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">1 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">176 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+  </div>
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/blog/girls-trip-with-justwravel-best-group-travel-option</div>
+    <div class="device-grid" style="margin-bottom:14px">
+      
+      <div class="device-card">
+        <div class="device-name">Mobile S</div>
+        <div class="device-size">320×568</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile M</div>
+        <div class="device-size">375×667</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile L</div>
+        <div class="device-size">425×926</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Tablet</div>
+        <div class="device-size">768×1024</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Laptop</div>
+        <div class="device-size">1280×800</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+    </div>
+
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">35 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">35 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">35 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">35 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">35 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+  </div>
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/treks/india/jammu-and-kashmir/kashmir-great-lakes-trek</div>
+    <div class="device-grid" style="margin-bottom:14px">
+      
+      <div class="device-card">
+        <div class="device-name">Mobile S</div>
+        <div class="device-size">320×568</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile M</div>
+        <div class="device-size">375×667</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile L</div>
+        <div class="device-size">425×926</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Tablet</div>
+        <div class="device-size">768×1024</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Laptop</div>
+        <div class="device-size">1280×800</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+    </div>
+
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">76 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">76 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">76 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">76 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">81 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+  </div>
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/tour-packages/international/vietnam</div>
+    <div class="device-grid" style="margin-bottom:14px">
+      
+      <div class="device-card">
+        <div class="device-name">Mobile S</div>
+        <div class="device-size">320×568</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile M</div>
+        <div class="device-size">375×667</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile L</div>
+        <div class="device-size">425×926</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Tablet</div>
+        <div class="device-size">768×1024</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Laptop</div>
+        <div class="device-size">1280×800</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+    </div>
+
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">9 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">9 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">9 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">9 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">49 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+  </div>
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/tour-packages/international/maldives</div>
+    <div class="device-grid" style="margin-bottom:14px">
+      
+      <div class="device-card">
+        <div class="device-name">Mobile S</div>
+        <div class="device-size">320×568</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile M</div>
+        <div class="device-size">375×667</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Mobile L</div>
+        <div class="device-size">425×926</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Tablet</div>
+        <div class="device-size">768×1024</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+      <div class="device-card">
+        <div class="device-name">Laptop</div>
+        <div class="device-size">1280×800</div>
+        <span class="badge badge-warn">WARN</span>
+      </div>
+      
+    </div>
+
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">1 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile S</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">1 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile M</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">1 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Mobile L</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">1 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Tablet</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+      
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TEXT</div>
+          <div class="issue-fix">41 element(s) have font-size below 12px</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Ensure minimum font size is 12px for readability on mobile</div>
+        </div>
+        
+        
+        
+        <div class="issue-item MEDIUM" style="margin-bottom:6px">
+          <div class="issue-title"><strong>Laptop</strong> — <span class="badge badge-medium">MEDIUM</span> SMALL TOUCH TARGETS</div>
+          <div class="issue-fix">5 button(s)/link(s) smaller than 44x44px — hard to tap on mobile</div>
+          <div class="issue-fix" style="color:#0366d6">Fix: Set minimum height/width of 44px on all interactive elements</div>
+        </div>
+        
+        
+      
+    
+  </div>
+  
+</section>
+
+
+<!-- ════════════════════════════════════════════════════
+     TAB 7 — COOKIES & GDPR
+     ════════════════════════════════════════════════════ -->
+<section id="compliance">
+  <h2>🍪 Cookies &amp; GDPR Compliance (Selenium)</h2>
+  <div class="score-grid" style="margin-bottom:16px">
+    <div class="score-card"><div class="number grade-C">51<span style="font-size:16px">/100</span></div><div class="label">GDPR Score</div></div>
+    <div class="score-card"><div class="number grade-A">YES</div><div class="label">Cookie Banner</div></div>
+    <div class="score-card"><div class="number grade-F">NO</div><div class="label">Reject Option</div></div>
+    <div class="score-card"><div class="number grade-C">4</div><div class="label">Popups</div></div>
+    <div class="score-card"><div class="number">33</div><div class="label">Cookies Found</div></div>
+    <div class="score-card"><div class="number grade-F">29</div><div class="label">High Risk</div></div>
+  </div>
+
+  
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/ — GDPR Score: 65/100
+      <span class="badge badge-warn">C</span>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div style="margin-bottom:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Banner</strong>
+      <div style="margin-top:6px">
+        
+        <span class="badge badge-ok">DETECTED</span>
+        &nbsp;Accept: <span class="badge badge-ok">YES</span>
+        &nbsp;Reject: <span class="badge badge-fail">NO</span>
+        &nbsp;Preferences: <span class="badge badge-ok">YES</span>
+        
+      </div>
+    </div>
+
+    <!-- Popups -->
+    
+    <div style="margin-bottom:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Popups Detected</strong>
+      
+      <div class="issue-item MEDIUM" style="margin-top:6px">
+        <div class="issue-title">NEWSLETTER POPUP — Close button: YES</div>
+      </div>
+      
+    </div>
+    
+
+    <!-- Cookie audit -->
+    
+    <div>
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Security Audit</strong>
+      <table style="margin-top:8px">
+        <thead><tr><th>Cookie Name</th><th>Secure</th><th>HttpOnly</th><th>SameSite</th><th>Risk</th></tr></thead>
+        <tbody>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_scid</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_fbp</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">jw_session</td>
+            <td><span class="badge badge-ok">YES</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-warn">MEDIUM</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_gcl_au</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_gid</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_dc_gtm_UA-87129347-1</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_fbp</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_scid_r</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga_SK8RXE9D18</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+    
+
+    <!-- GDPR Issues -->
+    
+    <div style="margin-top:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Issues</strong>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">Cookie banner has no Reject/Decline option</div>
+        <div class="issue-fix">Fix: GDPR requires equal prominence for reject option</div>
+      </div>
+      
+      <div class="issue-item LOW" style="margin-top:6px">
+        <div class="issue-title">NEWSLETTER POPUP detected — may affect UX</div>
+        <div class="issue-fix">Fix: Consider reducing popup frequency or using less intrusive alternatives</div>
+      </div>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">9 cookie(s) missing multiple security flags</div>
+        <div class="issue-fix">Fix: Set Secure, HttpOnly, and SameSite=Strict on all sensitive cookies</div>
+      </div>
+      
+    </div>
+    
+  </div>
+  
+  
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/blog/girls-trip-with-justwravel-best-group-travel-option — GDPR Score: 30/100
+      <span class="badge badge-fail">F</span>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div style="margin-bottom:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Banner</strong>
+      <div style="margin-top:6px">
+        
+        <span class="badge badge-fail">NOT FOUND</span>
+        
+      </div>
+    </div>
+
+    <!-- Popups -->
+    
+    <div style="margin-bottom:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Popups Detected</strong>
+      
+      <div class="issue-item MEDIUM" style="margin-top:6px">
+        <div class="issue-title">NEWSLETTER POPUP — Close button: YES</div>
+      </div>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">GENERIC POPUP — Close button: NO</div>
+      </div>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">NOTIFICATION PROMPT — Close button: NO</div>
+      </div>
+      
+    </div>
+    
+
+    <!-- Cookie audit -->
+    
+    <div>
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Security Audit</strong>
+      <table style="margin-top:8px">
+        <thead><tr><th>Cookie Name</th><th>Secure</th><th>HttpOnly</th><th>SameSite</th><th>Risk</th></tr></thead>
+        <tbody>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga_SK8RXE9D18</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_fbp</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">jw_session</td>
+            <td><span class="badge badge-ok">YES</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-warn">MEDIUM</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">pvc_visits[0]</td>
+            <td><span class="badge badge-ok">YES</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-warn">MEDIUM</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_gcl_au</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_scid</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_gid</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_fbp</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_dc_gtm_UA-87129347-1</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga_W6XFLP6YVD</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_scid_r</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+    
+
+    <!-- GDPR Issues -->
+    
+    <div style="margin-top:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Issues</strong>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">No cookie consent banner detected</div>
+        <div class="issue-fix">Fix: Add GDPR-compliant cookie consent banner before setting any tracking cookies</div>
+      </div>
+      
+      <div class="issue-item LOW" style="margin-top:6px">
+        <div class="issue-title">NEWSLETTER POPUP detected — may affect UX</div>
+        <div class="issue-fix">Fix: Consider reducing popup frequency or using less intrusive alternatives</div>
+      </div>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">GENERIC POPUP has no close button — user cannot dismiss</div>
+        <div class="issue-fix">Fix: Always provide a clear close/dismiss option on popups</div>
+      </div>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">NOTIFICATION PROMPT has no close button — user cannot dismiss</div>
+        <div class="issue-fix">Fix: Always provide a clear close/dismiss option on popups</div>
+      </div>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">10 cookie(s) missing multiple security flags</div>
+        <div class="issue-fix">Fix: Set Secure, HttpOnly, and SameSite=Strict on all sensitive cookies</div>
+      </div>
+      
+    </div>
+    
+  </div>
+  
+  
+  
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📄 https://www.justwravel.com/treks/india/jammu-and-kashmir/kashmir-great-lakes-trek — GDPR Score: 60/100
+      <span class="badge badge-warn">C</span>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div style="margin-bottom:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Banner</strong>
+      <div style="margin-top:6px">
+        
+        <span class="badge badge-ok">DETECTED</span>
+        &nbsp;Accept: <span class="badge badge-ok">YES</span>
+        &nbsp;Reject: <span class="badge badge-fail">NO</span>
+        &nbsp;Preferences: <span class="badge badge-warn">NO</span>
+        
+      </div>
+    </div>
+
+    <!-- Popups -->
+    
+
+    <!-- Cookie audit -->
+    
+    <div>
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Cookie Security Audit</strong>
+      <table style="margin-top:8px">
+        <thead><tr><th>Cookie Name</th><th>Secure</th><th>HttpOnly</th><th>SameSite</th><th>Risk</th></tr></thead>
+        <tbody>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga_W6XFLP6YVD</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_gid</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_fbp</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">jw_session</td>
+            <td><span class="badge badge-ok">YES</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-warn">MEDIUM</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_gcl_au</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_fbp</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_dc_gtm_UA-87129347-1</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_scid</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_scid_r</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+          <tr>
+            <td style="font-family:monospace;font-size:12px">_ga_SK8RXE9D18</td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-fail">NO</span></td>
+            <td><span class="badge badge-ok">Lax</span></td>
+            <td><span class="badge badge-fail">HIGH</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+    
+
+    <!-- GDPR Issues -->
+    
+    <div style="margin-top:12px">
+      <strong style="font-size:12px;color:#6a737d;text-transform:uppercase;letter-spacing:0.4px">Issues</strong>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">Cookie banner has no Reject/Decline option</div>
+        <div class="issue-fix">Fix: GDPR requires equal prominence for reject option</div>
+      </div>
+      
+      <div class="issue-item MEDIUM" style="margin-top:6px">
+        <div class="issue-title">No cookie preference/settings option found</div>
+        <div class="issue-fix">Fix: Allow users to manage individual cookie categories</div>
+      </div>
+      
+      <div class="issue-item HIGH" style="margin-top:6px">
+        <div class="issue-title">10 cookie(s) missing multiple security flags</div>
+        <div class="issue-fix">Fix: Set Secure, HttpOnly, and SameSite=Strict on all sensitive cookies</div>
+      </div>
+      
+    </div>
+    
+  </div>
+  
+  
+</section>
+
+</main>
+
+<footer>Generated by Website Health &amp; Security Checker &nbsp;·&nbsp; 2026-05-07 17:27:07</footer>
+
+<script>
+function showTab(name) {
+  // Hide all sections
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.remove('active'));
+  // Show selected
+  document.getElementById(name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+// Activate overview by default
+showTab('overview');
+</script>
+</body>
+</html>
