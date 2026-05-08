@@ -256,27 +256,3 @@ website-checker/
     ├── report_generator.py    ← Jinja2 report builder
     └── report_template.html   ← 7-tab HTML report template
 ```
-
----
-
-## 💼 LinkedIn One-Liner
-
-> Built an end-to-end automated Website Health & Security Checker using Python + Selenium WebDriver. The tool crawls websites, detects broken links, audits SSL certificates, checks 8 OWASP security headers, scans forms for CSRF/XSS risks, tests mobile responsiveness across 5 device sizes, and checks GDPR cookie compliance — all generating a professional 7-tab HTML report. Built as part of my transition from Manual Testing to QA Automation & Security Engineering.
-
----
-
-## 🎤 Interview Talking Points
-
-**"Why did you build this?"**
-> As a manual tester moving into automation, I wanted a project that combines both QA and security — two areas I'm targeting. This solves a real problem for small businesses who can't afford manual audits.
-
-**"Where did you use Selenium specifically?"**
-> Selenium handles 4 of 7 checkers — JS page crawling, broken page screenshots, form DOM analysis, multi-device layout testing, and GDPR cookie detection. requests alone can't do any of these.
-
-**"What's the difference between this and a VA scanner?"**
-> This is a security posture and health checker — it finds misconfigurations and best-practice gaps. A full VA scanner like Nessus would demonstrate actual exploit payloads. The advanced phase of this project adds OWASP ZAP active scanning and CVE lookups.
-
----
-
-*Project by Rai — QA Engineer transitioning to Automation & Security*
-*Built with Python + Selenium | Portfolio Project 2025*
